@@ -49,6 +49,7 @@ interface AppContextValue {
 
   // evidence
   evidence: Evidence[];
+  hydrateEvidence: (evidence: Evidence[]) => void;
   addEvidence: (
     e: Omit<
       Evidence,
@@ -498,6 +499,14 @@ export function AppProvider({
   // EVIDENCE
   // --------------------------------------------------
 
+  const hydrateEvidence = useCallback(
+    (records: Evidence[]) => {
+      setEvidence(records);
+      setTimeline(buildTimeline(records));
+    },
+    []
+  );
+
   const addEvidence = useCallback(
     (
       e: Omit<
@@ -600,10 +609,8 @@ export function AppProvider({
     (id: string) => {
       const order: EvidenceStage[] = [
         'Collected',
-        'Transported',
-        'Received',
-        'Examined',
-        'Verified',
+        'Logged',
+        'Reviewed',
         'Archived',
       ];
 
@@ -1071,6 +1078,7 @@ export function AppProvider({
 
         // evidence
         evidence,
+        hydrateEvidence,
         addEvidence,
         advanceStage,
         updateEvidence,
@@ -1125,6 +1133,7 @@ export function AppProvider({
         setCaseStatus,
 
         evidence,
+        hydrateEvidence,
         addEvidence,
         advanceStage,
         updateEvidence,

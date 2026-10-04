@@ -91,6 +91,7 @@ export type AuditAction =
   | 'Case Status Changed'
   | 'Case Updated'
   | 'Report Generated'
+  | 'Supervisor Review'
   | 'Demo Reset'
   | 'Backup Created'
   | 'Backup Restored';

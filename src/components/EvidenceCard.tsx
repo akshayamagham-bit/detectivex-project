@@ -56,15 +56,11 @@ export function EvidenceCard({
   const handleAdvanceStage = async () => {
     if (isReadOnly || archived) return;
 
-    const nextIndex = currentIdx + 1;
-
-    if (nextIndex >= STAGE_FLOW.length) return;
-
-    const nextStage = STAGE_FLOW[nextIndex];
+    if (currentIdx >= STAGE_FLOW.length - 1) return;
 
     try {
       setIsAdvancing(true);
-      await advanceStage(evidence.id, nextStage);
+      await advanceStage(evidence.id);
     } catch (error) {
       console.error('Failed to advance evidence stage:', error);
     } finally {

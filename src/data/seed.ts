@@ -31,6 +31,7 @@ const iso = (minsAgo: number) =>
 export const DEMO_EVIDENCE: Evidence[] = [
   {
     id: 'E001',
+    evidenceId: 'E001',
     type: 'Weapon',
     location: 'Scene A — Living Room',
     description: '9mm pistol recovered beneath sofa cushion.',
@@ -53,6 +54,7 @@ export const DEMO_EVIDENCE: Evidence[] = [
 
   {
     id: 'E002',
+    evidenceId: 'E002',
     type: 'Fingerprint',
     location: 'Scene A — Rear Door Handle',
     description: 'Latent print lifted from brass handle.',
@@ -75,6 +77,7 @@ export const DEMO_EVIDENCE: Evidence[] = [
 
   {
     id: 'E003',
+    evidenceId: 'E003',
     type: 'Biological',
     location: 'Scene B — Kitchen Floor',
     description: 'Bloodstain sample, approx 12cm diameter.',
@@ -97,6 +100,7 @@ export const DEMO_EVIDENCE: Evidence[] = [
 
   {
     id: 'E004',
+    evidenceId: 'E004',
     type: 'Digital',
     location: 'Scene A — Bedroom Desk',
     description: 'Android phone, screen locked.',

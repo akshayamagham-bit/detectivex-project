@@ -97,6 +97,12 @@ type SortKey = 'newest' | 'oldest' | 'critical';
 function convertBackendEvidence(
   item: BackendEvidence,
 ): Evidence {
+  const id =
+    item.evidenceId ||
+    item.id ||
+    item._id ||
+    `EVD-${Date.now()}`;
+
   const stage = [
     'Collected',
     'Logged',
@@ -112,8 +118,8 @@ function convertBackendEvidence(
     new Date().toISOString();
 
   return {
-    id: item.evidenceId || item.id || `EVD-${Date.now()}`,
-    evidenceId: item.evidenceId || item.id || `EVD-${Date.now()}`,
+    id,
+    evidenceId: id,
     type: item.type as EvidenceType,
 
     location: item.location || 'Unknown',
@@ -181,10 +187,9 @@ export function Evidence() {
   };
   const {
     evidence,
-    addEvidence,
+    hydrateEvidence,
     updateEvidence,
     advanceStage,
-    hydrateEvidence,
     isReadOnly,
     caseInfo,
   } = useApp();
@@ -435,7 +440,7 @@ export function Evidence() {
           result.evidence
         );
 
-        addEvidence({
+        const savedEvidence: Evidence = {
           ...backendEvidence,
           notes: form.notes.trim(),
           severity: form.severity,
@@ -448,7 +453,14 @@ export function Evidence() {
           condition: form.condition,
           photo: form.photo,
           officer: caseInfo.officerName || 'Investigator',
-        });
+        };
+
+        hydrateEvidence([
+          savedEvidence,
+          ...evidence.filter(
+            (item) => item.id !== savedEvidence.id
+          ),
+        ]);
       }
 
       setForm(emptyForm);
