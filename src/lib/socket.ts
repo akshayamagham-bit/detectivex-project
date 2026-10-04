@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-export const socket = io("http://localhost:5000", {
+export const socket = io("http://https://detectivex-project-production.up.railway.app", {
     transports: ["websocket", "polling"],
     autoConnect: true,
     reconnection: true,

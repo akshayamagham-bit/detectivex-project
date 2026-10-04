@@ -75,8 +75,7 @@ interface BackendEvidence {
   updatedAt?: string;
 }
 
-const API_URL = 'http://localhost:5000/api/evidence';
-
+const API_URL = 'https://detectivex-project-production.up.railway.app/api/evidence';
 const emptyForm: FormState = {
   type: 'Weapon',
   location: '',
@@ -162,7 +161,7 @@ export function Evidence() {
   const generateHash = async (evidenceId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/evidence/${evidenceId}/hash`,
+        `http://https://detectivex-project-production.up.railway.app/api/evidence/${evidenceId}/hash`,
         {
           method: "POST",
         }

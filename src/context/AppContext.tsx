@@ -55,11 +55,7 @@ interface AppContextValue {
       'id' | 'timestamp' | 'stage' | 'battery' | 'signal'
     >
   ) => void;
-  hydrateEvidence: (items: Evidence[]) => void;
-  advanceStage: (
-    id: string,
-    nextStage?: EvidenceStage
-  ) => Promise<void>;
+  advanceStage: (id: string) => void;
   updateEvidence: (id: string, patch: Partial<Evidence>) => void;
 
   // suspects
@@ -111,16 +107,6 @@ const AppContext =
   createContext<AppContextValue | null>(null);
 
 let counter = 1000;
-
-const EVIDENCE_API_URL =
-  'http://localhost:5000/api/evidence';
-
-const EVIDENCE_STAGE_FLOW: EvidenceStage[] = [
-  'Collected',
-  'Logged',
-  'Reviewed',
-  'Archived',
-];
 
 const nextId = (prefix: string) =>
   `${prefix}${++counter}`;
@@ -548,8 +534,6 @@ export function AppProvider({
 
         id,
 
-        evidenceId: e.evidenceId || id,
-
         timestamp:
           new Date().toISOString(),
 
@@ -568,8 +552,7 @@ export function AppProvider({
         if (
           prev.some(
             (item) =>
-              item.id === full.id ||
-              item.evidenceId === full.evidenceId
+              item.id === full.id
           )
         ) {
           return prev;
@@ -609,140 +592,57 @@ export function AppProvider({
     ]
   );
 
-  const hydrateEvidence = useCallback(
-    (items: Evidence[]) => {
-      setEvidence((current) => {
-        const existingEvidenceIds = new Set(
-          current.map(
-            (item) => item.evidenceId || item.id
-          )
-        );
-
-        const displayIds = new Set(
-          current.map((item) => item.id)
-        );
-
-        const additions: Evidence[] = [];
-
-        items.forEach((item) => {
-          const backendId =
-            item.evidenceId || item.id;
-
-          if (existingEvidenceIds.has(backendId)) {
-            return;
-          }
-
-          const numericIds = Array.from(displayIds)
-            .map((id) => {
-              const match = /^E(\d+)$/.exec(id);
-              return match
-                ? Number(match[1])
-                : 0;
-            });
-
-          const nextNumber =
-            Math.max(0, ...numericIds) + 1;
-
-          const displayId = `E${String(
-            nextNumber
-          ).padStart(3, '0')}`;
-
-          displayIds.add(displayId);
-          existingEvidenceIds.add(backendId);
-          additions.push({
-            ...item,
-            id: displayId,
-            evidenceId: backendId,
-          });
-        });
-
-        return additions.length
-          ? [...additions, ...current]
-          : current;
-      });
-    },
-    []
-  );
-
   // --------------------------------------------------
   // ADVANCE EVIDENCE STAGE
   // --------------------------------------------------
 
   const advanceStage = useCallback(
-    async (
-      id: string,
-      requestedStage?: EvidenceStage
-    ) => {
-      const current = evidence.find(
-        (item) => item.id === id
-      );
-
-      if (!current) {
-        throw new Error(`Evidence ${id} was not found`);
-      }
-
-      const currentIndex =
-        EVIDENCE_STAGE_FLOW.indexOf(
-          current.stage
-        );
-
-      const next =
-        requestedStage ||
-        EVIDENCE_STAGE_FLOW[
-          Math.min(
-            currentIndex + 1,
-            EVIDENCE_STAGE_FLOW.length - 1
-          )
-        ];
-
-      if (
-        next === current.stage ||
-        !EVIDENCE_STAGE_FLOW.includes(next)
-      ) {
-        return;
-      }
-
-      if (current.evidenceId) {
-        const response = await fetch(
-          `${EVIDENCE_API_URL}/${current.evidenceId}/stage`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ stage: next }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Server returned ${response.status}`
-          );
-        }
-      }
+    (id: string) => {
+      const order: EvidenceStage[] = [
+        'Collected',
+        'Transported',
+        'Received',
+        'Examined',
+        'Verified',
+        'Archived',
+      ];
 
       setEvidence((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? {
-              ...item,
-              stage: next,
-              status: next,
-            }
-            : item
-        )
-      );
+        prev.map((e) => {
+          if (e.id !== id) {
+            return e;
+          }
 
-      logAction(
-        'Stage Advanced',
-        `${id} advanced from ${current.stage} to ${next}`
-      );
+          const idx =
+            order.indexOf(e.stage);
 
-      pushNotificationInternal({
-        title: 'Chain of Custody',
-        body: `${id} advanced to ${next}`,
-        kind: 'info',
-      });
+          const next =
+            order[
+            Math.min(
+              idx + 1,
+              order.length - 1
+            )
+            ];
+
+          if (next !== e.stage) {
+            logAction(
+              'Stage Advanced',
+              `${id} advanced from ${e.stage} to ${next}`
+            );
+
+            pushNotificationInternal({
+              title: 'Chain of Custody',
+              body: `${id} advanced to ${next}`,
+              kind: 'info',
+            });
+          }
+
+          return {
+            ...e,
+            stage: next,
+          };
+        })
+      );
 
       pushToast(
         `${id} stage advanced`,
@@ -750,7 +650,6 @@ export function AppProvider({
       );
     },
     [
-      evidence,
       logAction,
       pushNotificationInternal,
       pushToast,
@@ -1173,7 +1072,6 @@ export function AppProvider({
         // evidence
         evidence,
         addEvidence,
-        hydrateEvidence,
         advanceStage,
         updateEvidence,
 
@@ -1228,7 +1126,6 @@ export function AppProvider({
 
         evidence,
         addEvidence,
-        hydrateEvidence,
         advanceStage,
         updateEvidence,
 
