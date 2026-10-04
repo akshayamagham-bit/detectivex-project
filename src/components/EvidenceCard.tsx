@@ -76,7 +76,7 @@ export function EvidenceCard({
 
     try {
       const response = await fetch(
-        `http://https://detectivex-project-production.up.railway.app/api/evidence/${evidence.evidenceId}/hash`,
+        `https://valiant-creation-production-977b.up.railway.app/api/evidence/${evidence.evidenceId}/hash`,
         {
           method: "POST",
         }

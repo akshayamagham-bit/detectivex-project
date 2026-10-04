@@ -75,7 +75,7 @@ interface BackendEvidence {
   updatedAt?: string;
 }
 
-const API_URL = 'https://detectivex-project-production.up.railway.app/api/evidence';
+const API_URL = 'https://valiant-creation-production-977b.up.railway.app/api/evidence';
 const emptyForm: FormState = {
   type: 'Weapon',
   location: '',
@@ -161,7 +161,7 @@ export function Evidence() {
   const generateHash = async (evidenceId: string) => {
     try {
       const response = await fetch(
-        `http://https://detectivex-project-production.up.railway.app/api/evidence/${evidenceId}/hash`,
+        `https://valiant-creation-production-977b.up.railway.app/api/evidence/${evidenceId}/hash`,
         {
           method: "POST",
         }
